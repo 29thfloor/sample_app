@@ -4,14 +4,14 @@ describe "UserPages" do
 
   subject { page }
 
-  describe "signup page" do
+  describe "Signup page" do
   	before { visit signup_path }  
 
   	it { should have_selector('h1', text: 'Sign Up') }
   	it { should have_selector('title', text: full_title('Sign up')) }
   end
 
-  describe "profile page" do
+  describe "Profile page" do
   	let(:user) { FactoryGirl.create(:user) }
   	before { visit user_path(user) }
 
@@ -19,7 +19,7 @@ describe "UserPages" do
   	it { should have_selector('title', text: user.name) }
   end
 
-  describe "signup" do
+  describe "Signup" do
   	before { visit signup_path }
 
   	let(:submit) { "Create my account" }
@@ -38,12 +38,7 @@ describe "UserPages" do
   	end
 
   	describe "with valid information" do
-  		before do
-  			fill_in "Name", with: "Example User"
-  			fill_in "Email", with: "user@example.com"
-  			fill_in "Password", with: "foobar"
-  			fill_in "Confirmation", with: "foobar"
-  		end
+  		before { valid_signup }
 
   		it "should create a user" do
   			expect { click_button submit }.to change(User, :count).by(1)
@@ -63,19 +58,21 @@ describe "UserPages" do
 
   describe "edit" do
     let(:user) { FactoryGirl.create(:user) }
-    before { visit edit_user_path(user) }
-
-    describe "page" do
-      it { should have_selector('h1', text: "Update your profile") }
-      it { should have_selector('title', text: "Edit user") }
-      it { should have_link('change', href: 'http://gravatar.com/emails') }
+    before do
+      sign_in user
+      visit edit_user_path(user)
     end
 
+    describe "page" do
+      it { should have_selector('h1',    text: "Update your profile") }
+      it { should have_selector('title', text: "Edit user") }
+      it { should have_link('change', href: 'http://gravatar.com/emails') }
+      it { should have_selector('input', value: "Save changes")}
+    end
     describe "with invalid information" do
       before { click_button "Save changes" }
       it { should have_content('error') }
     end
-
     describe "with valid information" do
       let(:new_name)  { "New Name" }
       let(:new_email) { "new@example.com" }
@@ -86,13 +83,11 @@ describe "UserPages" do
         fill_in "Confirm Password", with: user.password
         click_button "Save changes"
       end
-
       it { should have_selector('title', text: new_name) }
       it { should have_selector('div.alert.alert-success') }
-      it { should have_link('Sign out', href: signout_path) }
-      specify { user.reload.name.should == new_name }
+      it { should have_link('Sign out', :href => signout_path) }
+      specify { user.reload.name.should  == new_name }
       specify { user.reload.email.should == new_email }
     end
-
   end
 end
