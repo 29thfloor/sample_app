@@ -8,6 +8,11 @@ describe "Authentication" do
 
   	it { should have_selector('h1', text: 'Sign in' )}
   	it { should have_selector('title', text: 'Sign in') }
+
+    it { should_not have_link('Users', href: users_path) }
+    it { should_not have_link('Profile') }
+    it { should_not have_link('Settings') }
+    it { should_not have_link('Sign out', href: signout_path) }
   end
 
   describe "signin" do
@@ -27,7 +32,7 @@ describe "Authentication" do
 
   	describe "with valid information" do
   		let(:user) { FactoryGirl.create(:user) }
-  		before { valid_signin(user) }
+  		before { sign_in user }
 
   		it { should have_selector('title', text: user.name) }
 
