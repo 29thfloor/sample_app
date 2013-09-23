@@ -28,9 +28,29 @@ describe "Static pages" do
 
       it "should render the user's feed" do
         user.feed.each do |item|
-          page.should have_selector("li##{item.id}", text: item.content)
+          if item.id < 10
+            page.should have_selector("li##{item.id}", text: item.content)
+          end
         end
       end
+
+      it "should display the user's micropost count" do
+        page.should have_selector("span.post-count", text: "#{user.microposts.count} micropost".pluralize(user.microposts.count))
+      end
+
+      describe "it should paginate the feed" do
+        before do
+          20.times do
+            content = Faker::Lorem.sentence(5)
+            user.microposts.create!(content: content)
+          end
+          sign_in user
+          visit root_path
+        end
+
+        it { should have_selector(".pagination li a", text: "2") }
+      end
+    
     end
   end
 
